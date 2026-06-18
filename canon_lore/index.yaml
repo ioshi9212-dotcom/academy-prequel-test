@@ -1,0 +1,196 @@
+lore_index_id: canon_lore_index
+version: v6_cleanup_academy_redirects
+format: yaml_lore_module
+
+purpose:
+  - "Новая чистая система лора вместо старой папки canon."
+  - "Старый canon не является источником истины после подключения canon_lore."
+  - "Индекс объясняет, какие лор-файлы читать всегда, а какие подтягивать по тегам, персонажам и сцене."
+  - "Персональная энергия персонажа хранится блоком energy в его main.yaml/character.yaml. Не заводить отдельные файлы под каждый тип энергии."
+
+always_load:
+  - "canon_lore/core/world_background.yaml"
+  - "canon_lore/academy/academy_background.yaml"
+  - "canon_lore/hidden/hidden_lore_policy.yaml"
+
+active_academy_files:
+  background: "canon_lore/academy/academy_background.yaml"
+  locations: "canon_lore/academy/academy_locations.yaml"
+  full: "canon_lore/academy/academy_full.yaml"
+  npc_social_rules: "gpt/locks/npc_living_scene_rules.md"
+
+active_world_files:
+  energy_system: "canon_lore/world/energy_system.yaml"
+  echo: "canon_lore/world/echo.yaml"
+  kairos: "canon_lore/world/kairos.yaml"
+  continents_and_worlds: "canon_lore/world/continents_and_worlds.yaml"
+
+load_rules:
+  - "Сначала читать базовый фон из always_load."
+  - "Потом смотреть current_state, last_player_input, scene_goal, location, active/nearby/scheduled персонажей."
+  - "Если в сцене, тексте или цели встречается тема из tag_triggers, подтянуть соответствующие файлы."
+  - "Персональная энергия персонажа хранится блоком energy в карточке персонажа. Не заводить отдельные файлы под каждый тип энергии."
+  - "Если активен персонаж с energy-блоком, общий файл canon_lore/world/energy_system.yaml может подтягиваться как база мира."
+  - "Если одновременно есть akira и raiden в scene_character_ids, подтянуть canon_lore/hidden/raiden_akira_bond.yaml."
+  - "Скрытый лор использовать для подтекста, поведения, напряжения и авторской логики, но не раскрывать персонажам без сыгранного основания."
+  - "Энергия в сцене должна быть ощутимой и эффектной, но не нарушать правила мира: не создавать явления из ничего."
+  - "Академия социально живая: NPC могут давать слухи, флирт, провокации, мини-арки и статусные столкновения."
+
+tag_triggers:
+  echo:
+    keywords:
+      - "эхо"
+      - "echo"
+      - "аномалия"
+      - "аномалии"
+      - "искажение"
+      - "разлом"
+      - "физическое эхо"
+    files:
+      - "canon_lore/world/echo.yaml"
+
+  kairos:
+    keywords:
+      - "кайрос"
+      - "кайросы"
+      - "kairos"
+      - "чистый кайрос"
+      - "гибрид"
+      - "не человек"
+    files:
+      - "canon_lore/world/kairos.yaml"
+
+  continents_worlds:
+    keywords:
+      - "континент"
+      - "материк"
+      - "второй мир"
+      - "два материка"
+      - "другой мир"
+      - "барьер"
+      - "северный сектор"
+      - "восточный сектор"
+    files:
+      - "canon_lore/world/continents_and_worlds.yaml"
+
+  energy:
+    keywords:
+      - "энергия"
+      - "энергетический"
+      - "тип энергии"
+      - "класс энергии"
+      - "уровень энергии"
+      - "фонит"
+      - "фонят"
+      - "фон"
+      - "поток"
+      - "перегруз"
+      - "выброс"
+      - "отклик"
+      - "импульс"
+      - "датчик"
+      - "пространство"
+      - "резонанс"
+      - "огонь"
+      - "тепло"
+      - "холод"
+      - "воздух"
+      - "магнит"
+      - "смещение"
+      - "иней"
+      - "вибрация"
+    files:
+      - "canon_lore/world/energy_system.yaml"
+
+  academy_locations:
+    keywords:
+      - "локация"
+      - "место"
+      - "главный двор"
+      - "задний выход"
+      - "корт"
+      - "баскетбол"
+      - "регистрация"
+      - "общежитие"
+      - "комната"
+      - "столовая"
+      - "медблок"
+      - "стрельбище"
+      - "бассейн"
+      - "полигон"
+      - "аудитория"
+      - "тренировочный блок"
+    files:
+      - "canon_lore/academy/academy_locations.yaml"
+
+  academy_full:
+    keywords:
+      - "академия"
+      - "астрейн"
+      - "форма"
+      - "дресс-код"
+      - "эмблема"
+      - "пиджак"
+      - "жакет"
+      - "персонал"
+      - "сотрудник"
+      - "куратор"
+      - "инструктор"
+      - "дисциплина"
+      - "допуск"
+      - "рейтинг"
+      - "проверка"
+      - "перегруз"
+      - "выброс"
+      - "датчик"
+      - "поток"
+      - "прерывание"
+      - "спарринг"
+      - "захват"
+      - "удержание"
+      - "стрельбище"
+      - "бассейн"
+      - "рейдер"
+      - "рейдерская подготовка"
+      - "северный сектор"
+      - "самуэль"
+      - "31 августа"
+    files:
+      - "canon_lore/academy/academy_full.yaml"
+
+  academy_npc_social:
+    keywords:
+      - "npc"
+      - "нпс"
+      - "студент"
+      - "студенты"
+      - "слух"
+      - "слухи"
+      - "интрига"
+      - "интриги"
+      - "провокация"
+      - "провоцирует"
+      - "задирает"
+      - "ухаживает"
+      - "флирт"
+      - "ревность"
+      - "мини-арка"
+      - "мини арка"
+      - "статус"
+      - "богатые"
+      - "бедные"
+      - "фоновые"
+    files:
+      - "gpt/locks/npc_living_scene_rules.md"
+
+character_energy_policy:
+  storage: "character_card_energy_block"
+  rule:
+    - "Не создавать canon_lore/energy/types/*.yaml."
+    - "Не создавать characters/{id}/energy.yaml."
+    - "Энергия персонажа должна быть в карточке персонажа: type, level/class at academy start, passive_background, visible_manifestation, can_do, limits, do_not."
+  character_cards:
+    akira: "characters/akira/main.yaml"
+    livia: "characters/livia/main.yaml"
+    haru: "characters/haru/main.yaml"
+    raiden: "characters/raiden/main.yaml"

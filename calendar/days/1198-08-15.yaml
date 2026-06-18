@@ -1,0 +1,49 @@
+date: "1198-08-15"
+label: "прибытие / задний вход у корта / регистрация / заселение"
+first_introduction_ids: [haru, raiden, kir]
+required_character_ids: [akira, livia]
+day_beats:
+  - beat_id: arrival_back_court
+    order: 1
+    character_ids: [akira, livia]
+    summary: "Акира и Ливия в обычной одежде входят с заднего выхода Академии со стороны корта / баскетбольных площадок. По совету Рэя, потому что там меньше толпы."
+    notes:
+      - "Акира не в форме Академии: кроссовки, чёрные штаны карго, топ, бордовый худи."
+  - beat_id: court_basketball
+    order: 2
+    character_ids: [haru, raiden]
+    summary: "Хару появляется на корте и играет в баскетбол. Райден находится рядом и наблюдает за игрой."
+  - beat_id: registration
+    order: 3
+    character_ids: [akira, livia]
+    summary: "Короткая регистрация без раскрытия конфиденциального досье."
+    notes:
+      - "Форма Академии может быть выдана как комплект, но не считается надетой."
+  - beat_id: dorm_assignment
+    order: 4
+    character_ids: [akira, livia]
+    summary: "Акира и Ливия получают комнату 214 и заселяются."
+    notes:
+      - "Окна комнаты 214 не заперты и не заблокированы."
+  - beat_id: kir_late_arrival
+    order: 5
+    character_ids: [kir]
+    summary: "Кир появляется позже как опоздавший и старый знакомый Акиры и Ливии."
+  - beat_id: medical_check
+    order: 6
+    character_ids: [akira]
+    summary: "Медосмотр после заселения."
+    notes:
+      - "Можно отметить ссадины, порезы, ушибы и физическую подготовку."
+  - beat_id: energy_response
+    order: 7
+    character_ids: [akira]
+    summary: "Минимальный энергетический отклик для подтверждения типа."
+    notes:
+      - "Не раскрывать максимум Акиры."
+do_not:
+  - "Не вводить Самуэля."
+  - "Не вводить Кэйла Норта."
+  - "Не делать баскетбол тайным тестом."
+  - "Не переодевать Акиру в форму без действия игрока или явного state."
+  - "Не раздувать день пустыми переходами."

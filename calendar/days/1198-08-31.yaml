@@ -1,0 +1,27 @@
+date: "1198-08-31"
+label: "день рождения Райдена / появление Самуэля"
+first_introduction_ids: [samuel]
+required_character_ids: [raiden, samuel]
+day_beats:
+  - beat_id: raiden_birthday
+    order: 1
+    character_ids: [raiden]
+    summary: "День рождения Райдена."
+  - beat_id: samuel_intro
+    order: 2
+    character_ids: [samuel]
+    summary: "Самуэль впервые появляется в Академии для проверки новичков."
+  - beat_id: samuel_public_statement
+    order: 3
+    character_ids: [samuel, raiden]
+    summary: "Самуэль делает публичное заявление. Райден слышит его."
+  - beat_id: samuel_notices_akira
+    order: 4
+    character_ids: [samuel, akira]
+    summary: "Самуэль замечает Акиру."
+notes:
+  - "Это сильный сюжетный бит."
+  - "Райден уже был введён раньше, это не его первое появление."
+do_not:
+  - "Не делать Самуэля знакомым раньше этой даты без отдельного override."
+  - "Не раскрывать hidden lore напрямую."

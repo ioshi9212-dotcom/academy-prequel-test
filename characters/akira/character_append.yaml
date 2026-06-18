@@ -1,0 +1,13 @@
+# ARCHIVED / NO LONGER ACTIVE
+# This file used to contain draft enrichment notes for Akira.
+# Loader note from the old file: active character loading uses:
+#   - characters/akira/main.yaml
+#   - characters/akira/character.yaml
+#   - characters/akira/past.yaml
+#
+# Keep this file only if the repository expects the path to exist.
+# Do not use it as an additional source of active character truth.
+id: akira
+file_type: archived_character_append
+active: false
+note: "All relevant Akira enrichment was merged into character.yaml and past.yaml in the replacement pack."

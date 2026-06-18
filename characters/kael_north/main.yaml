@@ -1,0 +1,11 @@
+id: char_kael_north
+name: { first: "Каэл", last: "Норт", full: "Каэл Норт", aliases: ["Каэл", "Норт"] }
+display: { known_name: "Каэл", unknown_name: "высокий преподаватель тактики", unknown_formal: "курсант/преподаватель", documents_name: "Каэл Норт" }
+story: { setting: "academy_1198", arc: "start_academy", role: "secondary_instructor_npc", pov_character: false }
+appearance:
+  age: "34"
+  height_cm: 190
+  reference_note: "По референсу/исходникам: высокий преподаватель тактики с серыми глазами, перчатками и тихим давлением."
+energy: { type: "вектор / траектория", short_manifestation: "см. character.yaml" }
+links:
+  character: "characters/kael_north/character.yaml"
