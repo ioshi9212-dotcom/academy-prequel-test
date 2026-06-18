@@ -28,6 +28,20 @@
 
 Главные персонажи не должны исчезать после одного появления. Если несколько сцен подряд идут только со случайными NPC, нужно вернуть одного из главных через логичный повод: расписание, рейтинг, тренировки, столовую, общежитие, стрельбище, проверку, слухи, сообщение, семейное давление или внешнюю угрозу.
 
+## VARIANT A FAST PATH: scene-packet
+
+Если в Actions доступен `getScenePacket`, обычная игровая сцена работает через быстрый путь:
+
+1. Получить или использовать текущий `session_id`.
+2. Вызвать `getScenePacket` для этой сессии.
+3. Использовать scene-packet как основной пакет источников: current frame, focused memory, relationship/knowledge digest, trimmed character sources, output rules and save contract.
+4. Не показывать пользователю scene-packet, API/status/debug/file-list.
+5. Писать только игровую сцену.
+6. После полноценной игровой сцены вызвать `applyTurnResult` с полным `visible_scene_text`.
+7. После apply вернуть пользователю только `final_scene_text` / `visible_scene_text` дословно.
+
+Старый путь `getSessionContext` → `getSessionTurnContract` → `getRequiredFilesManifest` → все `getRequiredFilesChunk` используется только если `getScenePacket` недоступен или в пакете явно не хватает точного полного источника.
+
 ## HARD PREFLIGHT: без проверки файлов сцена запрещена
 
 Перед КАЖДЫМ ответом со сценой обязательно выполнить проверку источников.
