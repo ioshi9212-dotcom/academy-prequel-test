@@ -1,0 +1,32 @@
+{
+  "state_id": "scene_history",
+  "rules": [
+    "Хранить краткую историю сцен, не огромные полотна.",
+    "Каждая запись должна фиксировать дату, время, локацию, участников, действие игрока, итог и изменения памяти.",
+    "Если сцена содержит важные реплики, сохранять короткие цитаты.",
+    "Если появился NPC, слух, предмет или новая локация — указать это в записи."
+  ],
+  "entries": [],
+  "entry_template": {
+    "scene_id": "scene_0001",
+    "date": "1198-08-15",
+    "time": "late_morning",
+    "location_id": "academy_main_courtyard",
+    "active_characters": [
+      "akira"
+    ],
+    "player_input": null,
+    "summary": "",
+    "important_lines": [],
+    "relationship_changes": [],
+    "knowledge_changes": [],
+    "reputation_changes": [],
+    "power_changes": [],
+    "rumor_changes": [],
+    "inventory_changes": [],
+    "new_or_updated_npcs": [],
+    "new_or_updated_locations": [],
+    "future_lock_progress": [],
+    "notes": []
+  }
+}

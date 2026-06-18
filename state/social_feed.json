@@ -1,0 +1,10 @@
+{
+  "schema": "academy_social_feed_v1",
+  "description": "Session-local social network feed. Background only; not the main plot.",
+  "items": {},
+  "rules": [
+    "Save only posts/mentions that can matter later.",
+    "Do not make social media global knowledge instantly.",
+    "Use as pressure, rumor, reputation or social consequence."
+  ]
+}

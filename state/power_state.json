@@ -1,0 +1,103 @@
+{
+  "state_id": "power_state",
+  "rules": [
+    "Разделять публично показанный уровень и реальный скрытый уровень.",
+    "Акира скрывает способности и масштаб возможностей.",
+    "Акира стабильна и контролирует себя; не писать её как машину убийства.",
+    "Райден не знает, что он гибрид.",
+    "Скрытая природа персонажей не раскрывается без сцен."
+  ],
+  "characters": {
+    "akira": {
+      "energy_public": "не раскрыто / скрывает возможности",
+      "energy_true": "пространство / скрытая природа / источник изменения баланса",
+      "control_public": "кажется собранной, но уровень неясен",
+      "control_true": "стабильна, контролирует себя, скрывает масштаб",
+      "known_by": [
+        "jun_carter",
+        "ray_carter"
+      ],
+      "partly_known_by": [],
+      "unknown_to": [
+        "akira",
+        "raiden_sterling",
+        "haru_foster",
+        "livia_cross",
+        "samuel_sterling",
+        "academy_students",
+        "academy_instructors"
+      ],
+      "hidden_abilities": [
+        "карман пространства",
+        "пространственные проявления",
+        "масштаб силы не измерен"
+      ],
+      "public_incidents": [],
+      "suspicion_hooks": [
+        "слишком спокойный контроль",
+        "несоответствие показателей",
+        "слишком точная реакция тела"
+      ]
+    },
+    "raiden_sterling": {
+      "energy_public": "холод / воздух",
+      "energy_true": "холод / воздух + скрытая гибридная природа",
+      "control_public": "сильный, дисциплинированный, опасный при раздражении",
+      "control_true": "высокий контроль, но эмоциональная нагрузка может давать иней/переохлаждение",
+      "known_by": [],
+      "partly_known_by": [],
+      "unknown_to": [
+        "raiden_sterling",
+        "akira",
+        "haru_foster",
+        "livia_cross",
+        "academy_students"
+      ],
+      "hidden_abilities": [
+        "гибридная природа не осознана"
+      ],
+      "public_incidents": [],
+      "suspicion_hooks": [
+        "пространство вокруг него холоднее",
+        "при эмоциях может появляться иней",
+        "жара раздражает"
+      ]
+    },
+    "haru_foster": {
+      "energy_public": "жар / огонь / тепло",
+      "energy_true": "жар / огонь / тепло",
+      "control_public": "сильный, живой, эмоциональный, но не бездумный",
+      "control_true": "контроль зависит от эмоций и ситуации",
+      "known_by": [
+        "academy_students",
+        "academy_instructors"
+      ],
+      "hidden_abilities": [],
+      "public_incidents": [],
+      "suspicion_hooks": []
+    },
+    "livia_cross": {
+      "energy_public": "уточнить",
+      "energy_true": "уточнить",
+      "control_public": "уточнить сценами",
+      "control_true": "уточнить сценами",
+      "known_by": [],
+      "hidden_abilities": [],
+      "public_incidents": [],
+      "suspicion_hooks": []
+    },
+    "samuel_sterling": {
+      "energy_public": "уточнить",
+      "energy_true": "уточнить",
+      "control_public": "высокий статус, дисциплина, командный контроль",
+      "control_true": "опасен не только силой, но и системным влиянием",
+      "known_by": [],
+      "hidden_abilities": [],
+      "public_incidents": [],
+      "suspicion_hooks": [
+        "замечает необычных носителей",
+        "использует проверки как отбор"
+      ]
+    }
+  }
+}

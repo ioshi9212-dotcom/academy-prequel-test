@@ -1,0 +1,12 @@
+{
+  "schema": "session_npcs_v1",
+  "purpose": "Session memory for invented NPCs who are not yet full character files.",
+  "policy": {
+    "background_npcs": "Do not save disposable background NPCs unless they become recurring or meaningful.",
+    "important_npcs": "Save invented NPCs with name, role, goal, conflict, witness value, rumor value, relationship effect, or future hook.",
+    "promotion_rule": "If an NPC becomes major enough for long-term canon, promote them later into characters/<id>/ files. Until then keep them here."
+  },
+  "important_npcs": {},
+  "open_npc_threads": [],
+  "recent_background_notes": []
+}

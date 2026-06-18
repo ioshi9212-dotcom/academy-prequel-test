@@ -1,0 +1,78 @@
+{
+  "state_id": "current_state",
+  "project_slug": "akira-academy-prequel",
+  "story": "academy_prequel_1198",
+  "current_date": "1198-08-15",
+  "current_time": "late_morning",
+  "current_location_id": "academy_back_court_exit",
+  "current_location_text": "Академия Астрейн, задний выход со стороны корта / баскетбольные площадки",
+  "akira_behavior_profile": "akira_v2_poisonous",
+  "weather": {
+    "summary": "set in first scene",
+    "temperature_feel": null,
+    "details": []
+  },
+  "akira_state": {
+    "visible_state": "calm outside",
+    "internal_state": "alert and focused",
+    "body_state": "after the road, controlled; first-day cheek scratch under Livia plaster; possible training fatigue if scene says so",
+    "player_defined_state": null,
+    "visible_mark": "scratch on cheek covered by a plaster placed by Livia",
+    "hair_state": "loose white hair by default unless player states braid/wet hair/other style"
+  },
+  "current_outfit": "кроссовки, чёрные штаны карго, топ, бордовый худи",
+  "uniform_worn": false,
+  "received_uniform": [],
+  "visible_inventory": [
+    "багаж с личными вещами"
+  ],
+  "nearby_items": [
+    "багаж Акиры с личными вещами"
+  ],
+  "active_characters": [
+    "akira",
+    "livia"
+  ],
+  "nearby_characters": [],
+  "scheduled_character_ids": [
+    "haru"
+  ],
+  "mentioned_character_ids": [],
+  "delayed_character_ids": [
+    "kir"
+  ],
+  "allowed_main_characters": [
+    "akira",
+    "livia",
+    "raiden",
+    "haru",
+    "kir",
+    "kiara",
+    "kael_north"
+  ],
+  "current_scene_goal": "Academy arrival through the back court exit and first social contact near the basketball courts",
+  "last_player_input": null,
+  "scene_count": 0,
+  "rules": [
+    "Use only akira-academy-prequel data.",
+    "Start 1198-08-15 from the back exit by the court / basketball courts, not the main courtyard.",
+    "Akira starts in ordinary pants outfit: sneakers, black cargo pants, top, burgundy hoodie.",
+    "Do not treat Academy uniform as worn until player action or explicit state says uniform_worn=true.",
+    "Do not stretch time without reason.",
+    "Use only visible real items in scene header.",
+    "Do not reveal hidden lore automatically.",
+    "Use Akira v2 poisonous profile as default."
+  ],
+  "outfit": {
+    "shoes": "кроссовки",
+    "bottom": "чёрные штаны карго",
+    "shirt": "топ",
+    "jacket": "бордовый худи"
+  },
+  "start_day_notes": [
+    "15 августа 1198 на щеке Акиры пластырь: Ливия наклеила его после ссадины.",
+    "Ссадина появилась за день до Академии, когда Акира в грозу доставала кота с дерева; Кир видел это.",
+    "Акира и Ливия входят через менее людный задний выход со стороны корта/баскетбольных площадок по совету Рэя.",
+    "Первый социальный узел дня связан с Хару и баскетбольной зоной; Райден может быть фоном рядом с Хару, но прямой контакт требует сценовой причины."
+  ]
+}

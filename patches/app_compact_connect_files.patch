@@ -1,0 +1,9 @@
+Ручной diff описан в `apply_connect_files_patch.py`.
+
+Ключевые изменения:
+1. DEFAULT_STATE_FILES дополнен open_threads/shared_incidents/gossip/rating/director_short_plan.
+2. Добавлен NEW_CHARACTER_FOLDERS.
+3. Добавлены CANON_LORE_FILES и DIRECTOR_RULE_FILES.
+4. character_file заменяется на character_files_for с fallback на старые md.
+5. active_scene_characters учитывает scheduled/mentioned/delayed персонажей.
+6. recommended_files_for_context включает lore/director файлы.

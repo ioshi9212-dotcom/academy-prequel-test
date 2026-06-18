@@ -1,0 +1,102 @@
+{
+  "schema": "story_lines_v1",
+  "project_slug": "akira-academy-prequel",
+  "story": "academy_prequel_1198",
+  "current_arc": "academy_day_001",
+  "rules": {
+    "character_cards_are_source_for_personality": true,
+    "this_file_stores_only_events_relationships_knowledge_obligations": true,
+    "every_event_requires_absolute_date": true,
+    "compact_every_turns": 15,
+    "story_is_planned_novel_chain_not_simulator": true
+  },
+  "turn_counter": {
+    "total_game_turns": 0,
+    "since_last_compaction": 0,
+    "compact_every_turns": 15,
+    "last_compaction_turn": 0,
+    "last_compaction_date": null,
+    "last_compaction_note": "clean academy reset",
+    "technical_turns_do_not_count": true
+  },
+  "shared_events": [
+    {
+      "event_id": "academy_eve_cat_rescue_plaster",
+      "date": "1198-08-14",
+      "participants": [
+        "akira",
+        "livia",
+        "kir"
+      ],
+      "summary": "Акира в грозу доставала кота с дерева и получила ссадину на щеке; Ливия наклеила пластырь, Кир видел сцену.",
+      "consequence": "15 августа в шапке сцены может быть пластырь на щеке; Ливия и Кир знают причину."
+    },
+    {
+      "event_id": "pre_1198_akira_livia_kir_school_link",
+      "date": "pre-1198",
+      "participants": [
+        "akira",
+        "livia",
+        "kir"
+      ],
+      "summary": "Акира, Ливия и Кир знакомы до Академии; старая школьная связка.",
+      "consequence": "Не разыгрывать знакомство с нуля."
+    }
+  ],
+  "active_lines": {
+    "academy_arrival": {
+      "status": "open",
+      "date_started": "1198-08-15",
+      "summary": "Akira and Livia arrive at Academy Astrein for the first day.",
+      "characters": [
+        "akira",
+        "livia"
+      ],
+      "event_refs": [],
+      "next_beats": [
+        "registration",
+        "official route",
+        "dorm assignment",
+        "first social pressure"
+      ]
+    },
+    "akira_livia_friendship": {
+      "status": "open",
+      "date_started": "1198-08-15",
+      "summary": "Akira and Livia start the academy route together.",
+      "characters": [
+        "akira",
+        "livia"
+      ],
+      "event_refs": [],
+      "next_beats": []
+    },
+    "akira_last_year_overtraining": {
+      "status": "active_background",
+      "summary": "После пожара в обычной школе и случая с Каем Акира последний год стала резче и часто тренируется до изнеможения.",
+      "participants": [
+        "akira",
+        "livia",
+        "kir"
+      ]
+    },
+    "academy_social_attention_haru_raiden": {
+      "status": "active_background",
+      "summary": "Хару и Райден создают фоновое внимание девушек/поклонниц и социальный шум Академии.",
+      "participants": [
+        "haru",
+        "raiden",
+        "livia",
+        "akira"
+      ]
+    }
+  },
+  "closed_lines": {},
+  "compacted_summary": "Clean academy start. No imported played scenes from other projects.",
+  "next_beats": [
+    "finish registration",
+    "move through official route",
+    "establish Livia's presence",
+    "introduce academy social tension"
+  ]
+}

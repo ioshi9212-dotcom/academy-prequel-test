@@ -1,0 +1,10 @@
+{
+  "state_id": "calendar_runtime",
+  "calendar_source": "calendar/calendar_index.yaml",
+  "current_date": "1198-08-15",
+  "current_day_file": "calendar/days/1198-08-15.yaml",
+  "current_beat_id": "arrival_back_court",
+  "completed_beat_ids": [],
+  "skipped_beat_ids": [],
+  "introduced_character_ids": []
+}
