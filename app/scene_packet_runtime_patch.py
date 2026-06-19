@@ -1,31 +1,27 @@
-"""Variant A scene-packet runtime patch.
+"""Compact scene-packet runtime patch for Academy Prequel TEST.
 
-Adds one compact GPT Action endpoint for the Custom GPT workflow:
-`GET /api/v1/sessions/{session_id}/scene-packet`.
-
-Purpose:
-- reduce the number of required action calls before a scene;
-- give GPT one ready scene packet with current state, rules, focused memory and
-  trimmed sources;
-- keep the old context / turn-contract / required-files chunk endpoints intact.
+Fixes GPT Actions ResponseTooLargeError by making getScenePacket small by default.
+Adds:
+GET /api/v1/sessions/{session_id}/scene-packet
+operationId: getScenePacket
 """
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-# Import the full current runtime first, then patch on top of it.
+# Import current runtime first, then patch on top of it.
 import app.context_transport_header_hotfix as header_hotfix  # noqa: F401
 from app.context_transport_header_hotfix import app
 from app import compact as base
 import app.context_transport_runtime_patch as rt
 
-app.version = "0.3.60-variant-a-scene-packet"
+app.version = "0.3.61-compact-scene-packet"
 
 SCENE_PACKET_PATH = "/api/v1/sessions/{session_id}/scene-packet"
-DEFAULT_SCENE_PACKET_MAX_CHARS = 42000
+DEFAULT_SCENE_PACKET_MAX_CHARS = 16000
+HARD_MAX_SCENE_PACKET_CHARS = 24000
 
 
 class ScenePacketSource(BaseModel):
@@ -38,7 +34,7 @@ class ScenePacketSource(BaseModel):
 
 class ScenePacketResponse(BaseModel):
     session_id: str
-    packet_version: str = "variant_a_scene_packet_v1"
+    packet_version: str = "variant_a_compact_scene_packet_v2"
     mode: str = "play"
     usage_note: str
     final_output_rule: str
@@ -57,22 +53,22 @@ class ScenePacketResponse(BaseModel):
 
 def _trim(text: Any, limit: int) -> tuple[str, bool]:
     value = "" if text is None else str(text)
+    limit = max(0, int(limit))
     if len(value) <= limit:
         return value, False
-    return value[: max(0, limit)].rstrip() + "\n...[truncated by scene-packet]", True
+    return value[:limit].rstrip() + "\n...[truncated]", True
 
 
-def _jsonable(value: Any) -> Any:
-    if hasattr(value, "model_dump"):
-        return value.model_dump()
-    if isinstance(value, list):
-        return [_jsonable(v) for v in value]
-    if isinstance(value, dict):
-        return {str(k): _jsonable(v) for k, v in value.items()}
-    return value
+def _dedupe(items: list[str]) -> list[str]:
+    result: list[str] = []
+    for item in items:
+        if item and item not in result:
+            result.append(item)
+    return result
 
 
 def _compact_current_frame(current: dict[str, Any]) -> dict[str, Any]:
+    last_input, last_input_truncated = _trim(current.get("last_player_input"), 900)
     return {
         "current_date": current.get("current_date"),
         "current_time": current.get("current_time"),
@@ -96,51 +92,34 @@ def _compact_current_frame(current: dict[str, Any]) -> dict[str, Any]:
         "scheduled_character_ids": current.get("scheduled_character_ids", []),
         "delayed_character_ids": current.get("delayed_character_ids", []),
         "story_flags": current.get("story_flags", {}),
-        "last_player_input": current.get("last_player_input"),
+        "last_player_input": last_input,
+        "last_player_input_truncated": last_input_truncated,
     }
 
 
-def _manifest_dicts(manifest: list[Any]) -> list[dict[str, Any]]:
-    result: list[dict[str, Any]] = []
-    for item in manifest:
-        data = _jsonable(item)
-        if isinstance(data, dict):
-            result.append(data)
-    return result
-
-
-def _add_source(
-    sources: list[ScenePacketSource],
-    *,
-    path: str,
-    content: str | None,
-    source: str | None,
-    remaining_budget: int,
-    preferred_limit: int,
-) -> int:
-    if remaining_budget <= 1200 or content is None:
-        return remaining_budget
-    limit = max(900, min(preferred_limit, remaining_budget))
-    trimmed, truncated = _trim(content, limit)
-    sources.append(
-        ScenePacketSource(
-            path=path,
-            source=source or "project",
-            content=trimmed,
-            content_chars=len(trimmed),
-            truncated=truncated,
-        )
-    )
-    return remaining_budget - len(trimmed)
+def _slim_manifest(manifest: list[Any], limit: int = 30) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for item in manifest[:limit]:
+        data: dict[str, Any]
+        if hasattr(item, "model_dump"):
+            data = item.model_dump()
+        elif isinstance(item, dict):
+            data = item
+        else:
+            continue
+        out.append({
+            "path": data.get("path"),
+            "source": data.get("source"),
+            "chars": data.get("chars") or data.get("content_chars") or data.get("size"),
+            "missing": data.get("missing", False),
+        })
+    if len(manifest) > limit:
+        out.append({"path": "...[manifest truncated]", "remaining_items": len(manifest) - limit})
+    return out
 
 
 def _focused_source_paths(scene_character_ids: list[str]) -> list[str]:
     paths: list[str] = []
-
-    # The digest is synthetic and carries the compact state/relationship/knowledge layer.
-    paths.append(rt.RUNTIME_DIGEST_FILE)
-
-    # Compact global rule/source indexes.
     for path in [
         "gpt/locks/runtime_scene_rules_digest.md",
         "gpt/scene_format.md",
@@ -149,105 +128,103 @@ def _focused_source_paths(scene_character_ids: list[str]) -> list[str]:
         if base.repo_file_exists(path):
             paths.append(path)
 
-    # Current scene characters only. Full files are trimmed by scene-packet budget.
+    # Keep only currently relevant character files. Avoid loading every required file.
     for cid in scene_character_ids:
         for path in rt.character_files_for_context(cid, include_past=True):
             paths.append(path)
+    return _dedupe(paths)
 
-    # Preserve order, remove duplicates.
-    result: list[str] = []
-    for path in paths:
-        if path and path not in result:
-            result.append(path)
-    return result
+
+def _preferred_limit(path: str, remaining: int) -> int:
+    if "/character.yaml" in path:
+        return min(3200, remaining)
+    if "/main.yaml" in path:
+        return min(1800, remaining)
+    if "/past.yaml" in path:
+        return min(1600, remaining)
+    if path.endswith("runtime_scene_rules_digest.md"):
+        return min(2200, remaining)
+    if path.endswith("scene_format.md"):
+        return min(1800, remaining)
+    return min(1300, remaining)
+
+
+def _add_source(sources: list[ScenePacketSource], path: str, sid: str, remaining: int) -> int:
+    if remaining <= 900:
+        return remaining
+    content, source = rt.read_required_file_for_bundle(path, sid)
+    if content is None:
+        return remaining
+    limit = max(500, _preferred_limit(path, remaining))
+    trimmed, truncated = _trim(content, limit)
+    sources.append(ScenePacketSource(
+        path=path,
+        source=source or "project",
+        content=trimmed,
+        content_chars=len(trimmed),
+        truncated=truncated,
+    ))
+    return remaining - len(trimmed)
+
+
+def _compact_output_contract() -> dict[str, Any]:
+    return {
+        "scene_format": "Use Academy scene header, body, and bottom choice blocks from instructions/current rules.",
+        "dialogue": "**Name** — Replica. (*short action note*)",
+        "do_not_show": ["API", "JSON", "session_id", "debug", "file lists", "tool status"],
+        "do_not_write_for_akira": "Do not answer for Akira on direct questions/challenges.",
+    }
 
 
 def build_scene_packet(session_id: str, *, max_chars: int = DEFAULT_SCENE_PACKET_MAX_CHARS) -> ScenePacketResponse:
     sid = base.safe_session_id(session_id)
     base.ensure_session(sid)
 
-    max_chars = max(18000, min(int(max_chars or DEFAULT_SCENE_PACKET_MAX_CHARS), 70000))
+    try:
+        requested = int(max_chars or DEFAULT_SCENE_PACKET_MAX_CHARS)
+    except Exception:
+        requested = DEFAULT_SCENE_PACKET_MAX_CHARS
+    max_chars = max(9000, min(requested, HARD_MAX_SCENE_PACKET_CHARS))
 
     current = base.read_json("state/current_state.json", sid, default={}) or {}
     future = base.read_json("state/future_locks_progress.json", sid, default={}) or {}
     scene_character_ids = rt.scene_character_ids(current, future)
 
     required_files, _loaded_parts, manifest, missing_files = rt.required_file_parts_safe(sid)
-    manifest_dicts = _manifest_dicts(manifest)
 
-    # Budget layout: compact digest first, then focused source excerpts.
     digest_full = rt.build_scene_context_digest(sid)
-    digest_limit = max(9000, min(18000, max_chars // 2))
+    digest_limit = max(4500, min(8000, max_chars // 2))
     scene_context_digest, digest_truncated = _trim(digest_full, digest_limit)
 
-    sources: list[ScenePacketSource] = []
     remaining = max_chars - len(scene_context_digest)
-
+    sources: list[ScenePacketSource] = []
     for path in _focused_source_paths(scene_character_ids):
-        if path == rt.RUNTIME_DIGEST_FILE:
-            # Already included as scene_context_digest.
-            continue
-        content, source = rt.read_required_file_for_bundle(path, sid)
-        if content is None:
-            continue
-
-        # Character files get more space than indexes/locks, but everything stays capped.
-        if "/character.yaml" in path:
-            preferred = 6500
-        elif "/past.yaml" in path:
-            preferred = 4200
-        elif "/main.yaml" in path:
-            preferred = 3500
-        else:
-            preferred = 3200
-        remaining = _add_source(
-            sources,
-            path=path,
-            content=content,
-            source=source,
-            remaining_budget=remaining,
-            preferred_limit=preferred,
-        )
-        if remaining <= 1500:
+        remaining = _add_source(sources, path, sid, remaining)
+        if remaining <= 900 or len(sources) >= 8:
             break
 
     save_contract = {
-        "after_scene": "Call applyTurnResult after writing a meaningful gameplay scene.",
-        "visible_scene_text": "Pass the complete user-visible scene verbatim to applyTurnResult.visible_scene_text.",
-        "state_changes": "Save only meaningful changes: current_state, story_lines, relationships, knowledge, reputation, rumors, inventory, power/future locks.",
-        "do_not_save": [
-            "technical/debug/audit turns",
-            "every minor line of dialogue",
-            "facts not actually seen/heard/known by characters",
-        ],
-        "final_response": "After applyTurnResult, return final_scene_text/visible_scene_text verbatim. Do not show changed_files/status in gameplay.",
+        "after_scene": "Call applyTurnResult after a meaningful gameplay scene.",
+        "visible_scene_text": "Pass only the final visible scene text.",
+        "save_only": ["state", "relationships", "knowledge", "reputation", "rumors", "inventory", "important hooks"],
+        "do_not_save": ["debug", "technical turns", "decorative lines", "unknown hidden facts"],
     }
 
     fallback_actions = {
-        "normal_play": "Use this scene-packet as the primary source. Do not call context/turn-contract/chunks unless packet is missing critical detail.",
-        "if_need_full_sources": [
-            "getRequiredFilesManifest",
-            "getRequiredFilesChunk chunk_index=0",
-            "continue getRequiredFilesChunk until has_more=false",
-        ],
-        "if_packet_failed": "Do not write a scene. Say: Не удалось загрузить пакет сцены. Повтори сообщение после обновления API.",
+        "normal_play": "Use scene-packet first.",
+        "if_need_full_sources": ["getRequiredFilesManifest", "getRequiredFilesChunk"],
+        "if_packet_failed": "Retry getScenePacket with max_chars=9000. If it still fails, use context/turn-contract/chunks.",
     }
 
     return ScenePacketResponse(
         session_id=sid,
-        usage_note=(
-            "Variant A fast path. Use this packet to render the next gameplay scene with fewer Actions calls. "
-            "The user must not see this packet, API status, file lists or debug summaries."
-        ),
-        final_output_rule=(
-            "Final answer in play mode must be the gameplay scene only: old Academy header, scene body, "
-            "bottom blocks. No API/status/changelog text."
-        ),
+        usage_note="Compact scene-packet for GPT Actions. Do not reveal API/debug details to user.",
+        final_output_rule="Final answer in play mode must be the gameplay scene only.",
         current_frame=_compact_current_frame(current),
         scene_character_ids=scene_character_ids,
-        required_files=required_files,
-        file_manifest=manifest_dicts,
-        missing_files=missing_files,
+        required_files=required_files[:60],
+        file_manifest=_slim_manifest(manifest),
+        missing_files=missing_files[:40],
         scene_context_digest=scene_context_digest,
         focused_sources=sources,
         source_budget={
@@ -256,9 +233,11 @@ def build_scene_packet(session_id: str, *, max_chars: int = DEFAULT_SCENE_PACKET
             "digest_truncated": digest_truncated,
             "focused_sources_chars": sum(src.content_chars for src in sources),
             "focused_sources_count": len(sources),
-            "note": "Some sources may be trimmed. Use required-files chunks only when exact full text is necessary.",
+            "manifest_truncated": len(manifest) > 30,
+            "required_files_truncated": len(required_files) > 60,
+            "hard_response_goal": "avoid GPT Actions ResponseTooLargeError",
         },
-        output_format_contract=base.output_format_contract(),
+        output_format_contract=_compact_output_contract(),
         save_contract=save_contract,
         fallback_actions=fallback_actions,
     )
@@ -273,63 +252,46 @@ _ORIGINAL_OPENAPI = app.openapi
 
 
 def _object_schema(properties: dict | None = None, *, required: list[str] | None = None) -> dict:
-    schema = {
-        "type": "object",
-        "properties": properties or {},
-        "additionalProperties": True,
-    }
+    schema = {"type": "object", "properties": properties or {}, "additionalProperties": True}
     if required:
         schema["required"] = required
     return schema
 
 
 def _session_path_param() -> dict:
-    return {
-        "name": "session_id",
-        "in": "path",
-        "required": True,
-        "schema": {"type": "string"},
-    }
+    return {"name": "session_id", "in": "path", "required": True, "schema": {"type": "string"}}
 
 
 def _scene_packet_query_params() -> list[dict]:
-    return [
-        {
-            "name": "max_chars",
-            "in": "query",
-            "required": False,
-            "schema": {"type": "integer", "default": DEFAULT_SCENE_PACKET_MAX_CHARS},
-            "description": "Approximate source-character budget for the packet. Keep default for GPT Actions.",
-        }
-    ]
+    return [{
+        "name": "max_chars",
+        "in": "query",
+        "required": False,
+        "schema": {"type": "integer", "default": DEFAULT_SCENE_PACKET_MAX_CHARS},
+        "description": "Approximate compact packet budget. Default is safe for GPT Actions.",
+    }]
 
 
 def _scene_packet_response() -> dict:
     return {
-        "description": "Variant A ready scene packet",
-        "content": {
-            "application/json": {
-                "schema": _object_schema(
-                    {
-                        "session_id": {"type": "string"},
-                        "packet_version": {"type": "string"},
-                        "usage_note": {"type": "string"},
-                        "final_output_rule": {"type": "string"},
-                        "current_frame": _object_schema(),
-                        "scene_character_ids": {"type": "array", "items": {"type": "string"}},
-                        "required_files": {"type": "array", "items": {"type": "string"}},
-                        "file_manifest": {"type": "array", "items": _object_schema()},
-                        "missing_files": {"type": "array", "items": {"type": "string"}},
-                        "scene_context_digest": {"type": "string"},
-                        "focused_sources": {"type": "array", "items": _object_schema()},
-                        "output_format_contract": _object_schema(),
-                        "save_contract": _object_schema(),
-                        "fallback_actions": _object_schema(),
-                    },
-                    required=["session_id", "packet_version"],
-                )
-            }
-        },
+        "description": "Compact Variant A ready scene packet",
+        "content": {"application/json": {"schema": _object_schema({
+            "session_id": {"type": "string"},
+            "packet_version": {"type": "string"},
+            "usage_note": {"type": "string"},
+            "final_output_rule": {"type": "string"},
+            "current_frame": _object_schema(),
+            "scene_character_ids": {"type": "array", "items": {"type": "string"}},
+            "required_files": {"type": "array", "items": {"type": "string"}},
+            "file_manifest": {"type": "array", "items": _object_schema()},
+            "missing_files": {"type": "array", "items": {"type": "string"}},
+            "scene_context_digest": {"type": "string"},
+            "focused_sources": {"type": "array", "items": _object_schema()},
+            "source_budget": _object_schema(),
+            "output_format_contract": _object_schema(),
+            "save_contract": _object_schema(),
+            "fallback_actions": _object_schema(),
+        }, required=["session_id", "packet_version"])}}},
     }
 
 
@@ -340,11 +302,8 @@ def _openapi_with_scene_packet() -> dict:
     schema.setdefault("paths", {})[SCENE_PACKET_PATH] = {
         "get": {
             "operationId": "getScenePacket",
-            "summary": "Get one ready scene packet for Variant A Custom GPT play mode",
-            "description": (
-                "Fast path for gameplay: call this before writing a scene. "
-                "It combines compact context, source digest, focused character excerpts, rules and save contract."
-            ),
+            "summary": "Get compact ready scene packet for Custom GPT play mode",
+            "description": "Fast compact path for gameplay. Smaller response to avoid ResponseTooLargeError.",
             "parameters": [_session_path_param()] + _scene_packet_query_params(),
             "responses": {"200": _scene_packet_response()},
         }
