@@ -291,7 +291,7 @@ def _scene_packet_response() -> dict:
             "output_format_contract": _object_schema(),
             "save_contract": _object_schema(),
             "fallback_actions": _object_schema(),
-        }, required=["session_id", "packet_version"])}}},
+        }, required=["session_id", "packet_version"])}}
     }
 
 
